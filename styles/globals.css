@@ -1,0 +1,34 @@
+/* @tailwind base;
+@tailwind components;
+@tailwind utilities; */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+a {
+  text-decoration: none !important;
+  color: inherit !important;
+}
+
+.btn_del {
+  background-color: red;
+  height: 20px;
+  width: 30px;
+  border: none;
+  outline: none;
+  color: white;
+  cursor: pointer;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.MuiTreeItem-content.Mui-selected {
+  background-color: transparent !important;
+}
