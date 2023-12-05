@@ -125,13 +125,17 @@ export default function EditCourseDialog({
   const handleSave = async () => {
     setLoadingBtn(true);
     try {
-      const formData: FormData = new FormData();
-      formData.append("file", file);
-      const upload = await uploadImageAPI(formData);
+      let upload: any = "";
+      if (file) {
+        const formData: FormData = new FormData();
+        formData.append("file", file);
+        upload = await uploadImageAPI(formData);
+      }
+
       const body = {
         name: values.name,
         description: valueQill,
-        image: upload.image,
+        image: upload.image ? upload.image : course.image,
         price: values.price,
         category: values.category,
       };
@@ -140,7 +144,7 @@ export default function EditCourseDialog({
         ...course,
         name: values.name,
         description: valueQill,
-        image: upload.image,
+        image: upload.image ? upload.image : course.image,
         category: values.category,
       });
       successToast(res.message, 2000);

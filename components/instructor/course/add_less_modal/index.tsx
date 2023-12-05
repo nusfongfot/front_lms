@@ -98,17 +98,20 @@ export default function DialodAddLession({
       handleCloseAdd();
     }
   };
-
   const handleEdit = async () => {
     setLoadingBtn(true);
     try {
-      const formData: FormData = new FormData();
-      formData.append("video", videoFile as any);
-      const video = await uploadVideoAPI(formData);
+      let videoLink: any = "";
+      if (videoFile) {
+        const formData: FormData = new FormData();
+        formData.append("video", videoFile as any);
+        videoLink = await uploadVideoAPI(formData);
+      }
+
       const body = {
         name: values.name,
         content: values.content,
-        video: video.video,
+        video: videoLink.video ? videoLink.video : values.video,
         free_preview: isPreview,
       };
       const res = await updateLessionOfCourseAPI(lesson.id, body);
@@ -119,7 +122,7 @@ export default function DialodAddLession({
                 ...item,
                 name: values.name,
                 content: values.content,
-                video: video.video,
+                video: videoLink.video ? videoLink.video : values.video,
               }
             : item
         )
