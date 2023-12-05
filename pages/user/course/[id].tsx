@@ -387,7 +387,7 @@ export default function CourseUserPage() {
                     <ReactPlayer
                       url={preview}
                       width={"100%"}
-                      height={"750px"}
+                      height={"740px"}
                       controls={true}
                       onProgress={(e) => setPlayed(e.loadedSeconds)}
                       onEnded={handleVideoEnded}

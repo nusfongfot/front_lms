@@ -10,6 +10,7 @@ import { getProfileAPI } from "@/api/profile";
 import { errorToast } from "@/utils/notification";
 import { useRouter } from "next/router";
 import useInfo from "@/zustand/auth";
+import { deleteCookie } from "cookies-next";
 
 export default function App({ Component, pageProps }: AppProps) {
   const router = useRouter();
@@ -18,11 +19,15 @@ export default function App({ Component, pageProps }: AppProps) {
   useEffect(() => {
     (async () => {
       try {
-        const res = await getProfileAPI();
-        setInfo(res.data);
+        if (typeof window !== "undefined" && localStorage.getItem("tokenLms")) {
+          const res = await getProfileAPI();
+          setInfo(res.data);
+        }
       } catch (error: any) {
         errorToast(error.response.data.message, 2000);
         router.push("/");
+        deleteCookie("token");
+        localStorage.removeItem("tokenLms");
       }
     })();
   }, [accInfo.id]);
