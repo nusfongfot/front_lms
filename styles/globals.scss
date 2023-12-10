@@ -32,3 +32,36 @@ input::-webkit-inner-spin-button {
 .MuiTreeItem-content.Mui-selected {
   background-color: transparent !important;
 }
+
+.img_banner {
+  width: 100%;
+  opacity: 0.7;
+  height: 700px;
+  @media (max-width: 1024px) {
+    height: auto;
+  }
+}
+
+.card {
+  display: block;
+  position: relative;
+  top: 0;
+  bottom: 0;
+
+  .product {
+    display: none;
+    background-color: white;
+    position: absolute;
+    width: 100%;
+    top: 20px;
+    bottom: 0;
+    padding: 10px;
+  }
+
+  &:hover {
+    .product {
+      display: block;
+      top: 100px;
+    }
+  }
+}

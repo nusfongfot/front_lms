@@ -72,6 +72,7 @@ const Drawer = styled(MuiDrawer, {
   shouldForwardProp: (prop) => prop !== "open",
 })(({ theme, open }) => ({
   "& .MuiDrawer-paper": {
+    background: "black",
     position: "relative",
     whiteSpace: "nowrap",
     width: drawerWidth,
@@ -94,7 +95,11 @@ const Drawer = styled(MuiDrawer, {
   },
 }));
 
-const defaultTheme = createTheme();
+const defaultTheme = createTheme({
+  palette: {
+    mode: "light",
+  },
+});
 
 export default function Layout({ children }: Props) {
   const path = usePathname();
@@ -106,23 +111,23 @@ export default function Layout({ children }: Props) {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 
   const list: any[] = [
-    {
-      id: 1,
-      link: "/dashboard/overall",
-      title: "Dashboard",
-      icon: <DashboardIcon />,
-      isSubPath: false,
-    },
-    {
-      id: 2,
-      link: "/dashboard/browse",
-      title: "Browse",
-      icon: <PlagiarismIcon />,
-      isSubPath: false,
-    },
+    // {
+    //   id: 1,
+    //   link: "/dashboard/overall",
+    //   title: "Dashboard",
+    //   icon: <DashboardIcon />,
+    //   isSubPath: false,
+    // },
+    // {
+    //   id: 2,
+    //   link: "/dashboard/browse",
+    //   title: "Browse",
+    //   icon: <PlagiarismIcon />,
+    //   isSubPath: false,
+    // },
     {
       id: 6,
-      link: "/dashboard/profile",
+      link: "/instructor/profile",
       title: "Profile",
       icon: <AccountBoxIcon />,
       isSubPath: false,
@@ -137,19 +142,19 @@ export default function Layout({ children }: Props) {
         {
           id_in: 7,
           title: "Overall",
-          link: "/dashboard/instructor?subpath=overall",
+          link: "/instructor/overall?subpath=overall",
           subpath: "overall",
         },
         {
           id_in: 4,
           title: "My Course",
-          link: "/dashboard/instructor?subpath=mycourse",
+          link: "/instructor/overall?subpath=mycourse",
           subpath: "mycourse",
         },
         {
           id_in: 5,
           title: "Create Course",
-          link: "/dashboard/instructor?subpath=create",
+          link: "/instructor/overall?subpath=create",
           subpath: "create",
         },
       ],
@@ -174,28 +179,20 @@ export default function Layout({ children }: Props) {
     window.location.replace("/");
   };
 
-  const handleInstructor = async () => {
-    try {
-      const res = await becomeInstructorAPI();
-      router.replace(res);
-    } catch (error: any) {
-      errorToast(error.response.data.message, 2000);
-    }
-  };
   return (
     <ThemeProvider theme={defaultTheme}>
       <Box sx={{ display: "flex" }}>
         <CssBaseline />
-        <AppBar position="absolute" open={open}>
+        <AppBar position='absolute' open={open} sx={{ background: "black" }}>
           <Toolbar
             sx={{
               pr: "24px",
             }}
           >
             <IconButton
-              edge="start"
-              color="inherit"
-              aria-label="open drawer"
+              edge='start'
+              color='inherit'
+              aria-label='open drawer'
               onClick={toggleDrawer}
               sx={{
                 marginRight: "36px",
@@ -205,37 +202,44 @@ export default function Layout({ children }: Props) {
               <MenuIcon />
             </IconButton>
             <Typography
-              component="h1"
-              variant="h6"
-              color="inherit"
+              component='h1'
+              variant='h6'
+              color='inherit'
               noWrap
               sx={{ flexGrow: 1, textTransform: "capitalize" }}
             >
               {path?.split("/")[2]}
             </Typography>
-            {accInfo.role == "instructor" ? null : (
+            <Button
+              variant='text'
+              sx={{ color: "white" }}
+              onClick={() => router.push("/profile/mycourses")}
+            >
+              Student Mode
+            </Button>
+            {/* {accInfo.role == "instructor" ? null : (
               <Button
-                variant="text"
+                variant='text'
                 sx={{ color: "white" }}
                 onClick={handleInstructor}
               >
                 Become Instructor
               </Button>
-            )}
+            )} */}
             {auth && (
               <div>
                 <IconButton
-                  size="large"
-                  aria-label="account of current user"
-                  aria-controls="menu-appbar"
-                  aria-haspopup="true"
+                  size='large'
+                  aria-label='account of current user'
+                  aria-controls='menu-appbar'
+                  aria-haspopup='true'
                   onClick={handleMenu}
-                  color="inherit"
+                  color='inherit'
                 >
                   <Avatar src={accInfo.picture || ""} />
                 </IconButton>
                 <Menu
-                  id="menu-appbar"
+                  id='menu-appbar'
                   anchorEl={anchorEl}
                   anchorOrigin={{
                     vertical: "top",
@@ -263,20 +267,21 @@ export default function Layout({ children }: Props) {
             )}
           </Toolbar>
         </AppBar>
-        <Drawer variant="permanent" open={open}>
+        <Drawer variant='permanent' open={open}>
           <Toolbar
             sx={{
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
               px: [1],
+              color: "white",
             }}
           >
             <Box />
-            <Typography variant="h5" align="center">
+            <Typography variant='h5' align='center'>
               E-learning
             </Typography>
-            <IconButton onClick={toggleDrawer}>
+            <IconButton onClick={toggleDrawer} sx={{ color: "white" }}>
               <ChevronLeftIcon />
             </IconButton>
           </Toolbar>
@@ -285,9 +290,9 @@ export default function Layout({ children }: Props) {
           <List>
             {list.map((item, i) =>
               item.isSubPath ? (
-                <TreeView aria-label="file system navigator" key={i}>
+                <TreeView aria-label='file system navigator' key={i}>
                   <TreeItem
-                    nodeId="1"
+                    nodeId='1'
                     label={
                       <div
                         style={{
@@ -296,11 +301,12 @@ export default function Layout({ children }: Props) {
                           alignItems: "center",
                           justifyContent: "space-between",
                           marginLeft: "-16px",
+                          color: "white",
                         }}
                       >
                         <CastForEducationIcon />
                         <Typography
-                          variant="subtitle1"
+                          variant='subtitle1'
                           sx={{ display: open ? "block" : "none" }}
                         >
                           Instructor
@@ -326,7 +332,7 @@ export default function Layout({ children }: Props) {
                     {item.inside_path.map((val: any, iTwo: any) => (
                       <TreeItem
                         key={iTwo + 1}
-                        nodeId="2"
+                        nodeId='2'
                         label={
                           <div
                             style={{
@@ -334,10 +340,11 @@ export default function Layout({ children }: Props) {
                               display: "flex",
                               alignItems: "center",
                               marginLeft: "23px",
+                              color: "white",
                             }}
                             onClick={() => router.replace(val.link)}
                           >
-                            <Typography variant="subtitle1">
+                            <Typography variant='subtitle1'>
                               {val.title}
                             </Typography>
                           </div>
@@ -350,7 +357,7 @@ export default function Layout({ children }: Props) {
                           color:
                             router?.query?.subpath == val.subpath
                               ? "white"
-                              : "black",
+                              : "white",
                         }}
                       />
                     ))}
@@ -366,7 +373,7 @@ export default function Layout({ children }: Props) {
                     <ListItemAvatar>
                       <Box
                         sx={{
-                          color: path === item.link ? "white" : "black",
+                          color: path === item.link ? "white" : "white",
                         }}
                       >
                         {item.icon}
@@ -375,7 +382,7 @@ export default function Layout({ children }: Props) {
                     <ListItemText
                       primary={item.title}
                       sx={{
-                        color: path === item.link ? "white" : "black",
+                        color: path === item.link ? "white" : "white",
                       }}
                     />
                   </ListItem>
@@ -385,7 +392,7 @@ export default function Layout({ children }: Props) {
           </List>
         </Drawer>
         <Box
-          component="main"
+          component='main'
           sx={{
             backgroundColor: (theme) =>
               theme.palette.mode === "light"
@@ -397,7 +404,7 @@ export default function Layout({ children }: Props) {
           }}
         >
           <Toolbar />
-          <Container maxWidth="xl" sx={{ mt: 4 }}>
+          <Container maxWidth='xl' sx={{ mt: 4 }}>
             <Grid container>
               <Grid item xs={12}>
                 {children}

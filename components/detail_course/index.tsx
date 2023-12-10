@@ -6,10 +6,12 @@ import {
 } from "@/api/course";
 import { errorToast, successToast } from "@/utils/notification";
 import {
+  Avatar,
   Box,
   Button,
   Divider,
   Grid,
+  Paper,
   Stack,
   Typography,
   duration,
@@ -94,16 +96,20 @@ function DetailCourse({}: Props) {
 
   useEffect(() => {
     (async () => {
+      setLoading(true);
       try {
-        const res = await getCourseBrowseByIdAPI(
-          router?.query?.subpath as string
-        );
-        setLessons(res.lessons);
-        setCourse(res.data);
+        if (router?.query?.subpath) {
+          const res = await getCourseBrowseByIdAPI(
+            router?.query?.subpath as string
+          );
+          setLessons(res.lessons);
+          setCourse(res.data);
+        }
       } catch (error: any) {
         errorToast(error.response.data.message, 2000);
-        router.push("/dashboard/browse");
+        router.push("/courses/search");
       }
+      setLoading(false);
     })();
   }, [router?.query?.subpath]);
 
@@ -126,9 +132,9 @@ function DetailCourse({}: Props) {
             flexDirection={"column"}
             height={180}
           >
-            <Typography variant="h4">{course.name}</Typography>
+            <Typography variant='h4'>{course.name}</Typography>
             <Typography>by {course?.user?.name}</Typography>
-            <Typography variant="h5">
+            <Typography variant='h5'>
               {course.price == 0 ? "Free" : `${course.price} $`}
             </Typography>
             <Typography>Last updated 10/2566</Typography>
@@ -146,16 +152,26 @@ function DetailCourse({}: Props) {
               }}
               onClick={handleClickOpen}
             />
-            <Typography fontWeight={900} variant="h6">
+            <Typography fontWeight={900} variant='h6'>
               Preview this course
             </Typography>
-            {accInfo?.courses?.find(
-              (item: any) => item.id == router.query.subpath
-            ) ? (
+            {!accInfo.id ? (
               <Button
-                color="success"
-                variant="contained"
-                size="small"
+                variant='contained'
+                fullWidth
+                size='small'
+                color='warning'
+                onClick={() => router.push("/signin")}
+              >
+                Login to enroll
+              </Button>
+            ) : accInfo?.courses?.find(
+                (item: any) => item.id == router.query.subpath
+              ) ? (
+              <Button
+                color='success'
+                variant='contained'
+                size='small'
                 fullWidth
                 sx={{ mt: 1 }}
                 onClick={() =>
@@ -166,9 +182,9 @@ function DetailCourse({}: Props) {
               </Button>
             ) : course.price == 0 ? (
               <Button
-                color="success"
-                variant="contained"
-                size="small"
+                color='success'
+                variant='contained'
+                size='small'
                 fullWidth
                 sx={{ mt: 1 }}
                 onClick={handleEnrollMent}
@@ -178,9 +194,9 @@ function DetailCourse({}: Props) {
             ) : (
               course.price != 0 && (
                 <Button
-                  color="success"
-                  variant="contained"
-                  size="small"
+                  color='success'
+                  variant='contained'
+                  size='small'
                   fullWidth
                   sx={{ mt: 1 }}
                   onClick={handlePaidByStripe}
@@ -193,21 +209,24 @@ function DetailCourse({}: Props) {
         </Grid>
       </Grid>
 
-      <Box mt={2}>
+      <Paper sx={{ p: 2, mt: 2, border: "1px solid #d1d7dc" }}>
+        <Typography variant='h5' fontWeight={700}>
+          What you'll learn?
+        </Typography>
         <ReactQuill
           value={course?.description}
           readOnly={true}
           theme={"bubble"}
         />
-      </Box>
+      </Paper>
 
-      <Box>
-        <Button variant="outlined" size="small" onClick={handleClickOpenReview}>
+      <Box sx={{ mt: 2 }}>
+        <Button variant='outlined' size='small' onClick={handleClickOpenReview}>
           See All Review
         </Button>
         <Stack flexDirection={"row"} justifyContent={"space-between"} mt={2}>
-          <Typography variant="h5">{lessons.length | 0} Lesson</Typography>
-          <Typography variant="h5">{`Total ${totalHour} Hours`}</Typography>
+          <Typography variant='h5'>{lessons.length | 0} Lesson</Typography>
+          <Typography variant='h5'>{`Total ${totalHour} Hours`}</Typography>
         </Stack>
         {lessons.map((item: any, i: any) => (
           <Box key={i} mt={2}>
@@ -234,14 +253,14 @@ function DetailCourse({}: Props) {
                   alignItems={"center"}
                   justifyContent={"center"}
                 >
-                  <Typography variant="h5">{i + 1}</Typography>
+                  <Typography variant='h5'>{i + 1}</Typography>
                 </Stack>
                 <Stack>
-                  <Typography variant="h5">{item.name}</Typography>
-                  <Typography variant="subtitle2">{item.content}</Typography>
+                  <Typography variant='h5'>{item.name}</Typography>
+                  <Typography variant='subtitle2'>{item.content}</Typography>
                 </Stack>
               </Stack>
-              <Typography variant="h5">
+              <Typography variant='h5'>
                 {!!videoDurations[item.id]
                   ? `${videoDurations[item.id]} minutes`
                   : `0 minutes`}

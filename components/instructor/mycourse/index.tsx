@@ -58,15 +58,15 @@ function InstructorMyCourse({}: Props) {
 
   return (
     <Box>
-      <Typography variant="h4">My Course</Typography>
+      <Typography variant='h4'>My Course</Typography>
       <Box>
         {courses.length == 0 ? (
           <Stack flexDirection={"row"} mt={3} alignItems={"center"}>
             <Typography>Do you want to create your course now ?</Typography>
             <Button
-              size="small"
+              size='small'
               onClick={() =>
-                router.replace("/dashboard/instructor?subpath=create")
+                router.replace("/instructor/overall?subpath=create")
               }
             >
               Click here
@@ -83,25 +83,25 @@ function InstructorMyCourse({}: Props) {
                   />
                   <Box>
                     <Typography
-                      variant="h5"
+                      variant='h5'
                       sx={{ cursor: "pointer" }}
                       onClick={() =>
                         router.push(
-                          `/dashboard/instructor?subpath=course&id=${item.id}`
+                          `/instructor/overall?subpath=course&id=${item.id}`
                         )
                       }
                     >
                       {item.name}
                     </Typography>
-                    <Typography variant="h6">
+                    <Typography variant='h6'>
                       {item.lessions.length} Lesson
                     </Typography>
-                    <Typography variant="subtitle1" color={"orange"}>
+                    <Typography variant='subtitle1' color={"orange"}>
                       At least 5 lesson are required for publish a course
                     </Typography>
                   </Box>
                 </Stack>
-                <Button color="error" onClick={() => handleDeteCourse(item.id)}>
+                <Button color='error' onClick={() => handleDeteCourse(item.id)}>
                   x
                 </Button>
               </Stack>

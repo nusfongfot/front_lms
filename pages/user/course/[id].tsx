@@ -16,22 +16,25 @@ import {
   Alert,
   Avatar,
   Button,
-  Checkbox,
-  FormControlLabel,
   ListItem,
   ListItemText,
   Menu,
   MenuItem,
+  Paper,
   Stack,
+  TextField,
 } from "@mui/material";
 import { useRouter } from "next/router";
 import { usePathname } from "next/navigation";
-import { AccountCircle, Check, CheckBox } from "@mui/icons-material";
-import { errorToast } from "@/utils/notification";
+import { errorToast, successToast } from "@/utils/notification";
 import { useLoading } from "@/zustand/loading";
 import { deleteCookie } from "cookies-next";
 import HomeIcon from "@mui/icons-material/Home";
-import { getCourseUserByIdAPI, markCompleteAPI } from "@/api/course";
+import {
+  createLessonOfCourseAPI,
+  getCourseUserByIdAPI,
+  getLessonCompleteOfUser,
+} from "@/api/course";
 import ReactPlayer from "react-player";
 import PlayCircleIcon from "@mui/icons-material/PlayCircle";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -39,9 +42,16 @@ import CancelIcon from "@mui/icons-material/Cancel";
 import MyProcess from "@/components/process";
 import useInfo from "@/zustand/auth";
 import ReviewCouseUserDiaolog from "@/components/review_course_dialog";
+import {
+  createQuestionAPI,
+  getAllQuestionsAPI,
+  replyBackOfQuestionsAPI,
+} from "@/api/questions";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
 
+dayjs.extend(relativeTime);
 const drawerWidth: number = 450;
-
 interface AppBarProps extends MuiAppBarProps {
   open?: boolean;
 }
@@ -68,6 +78,7 @@ const Drawer = styled(MuiDrawer, {
   shouldForwardProp: (prop) => prop !== "open",
 })(({ theme, open }) => ({
   "& .MuiDrawer-paper": {
+    background: "black",
     position: "relative",
     whiteSpace: "nowrap",
     width: drawerWidth,
@@ -97,18 +108,36 @@ export default function CourseUserPage() {
   const router = useRouter();
   const id = router?.query?.id?.toString();
   const { accInfo } = useInfo();
+  const { setLoading } = useLoading();
 
   const [course, setCourse] = React.useState<any>({});
+  const [questions, setQuestions] = React.useState<any[]>([]);
+  const [lessonComplete, setLessonCompleted] = React.useState<any[]>([]);
+
   const [preview, setPreview] = React.useState("");
+  const [reply, setReply] = React.useState("");
   const [open, setOpen] = React.useState(true);
   const [auth, setAuth] = React.useState(true);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [played, setPlayed] = React.useState(0);
+  const [quesId, setQuesId] = React.useState(0);
   const [isEnded, setIsEnded] = React.useState(false);
   const [openReview, setOpenReview] = React.useState(false);
+  const [isAsk, setIsAsk] = React.useState(false);
+  const [IsReply, setIsReply] = React.useState(false);
+  const [isReview, setIsReview] = React.useState(true);
 
-  const [compelteLesson, setCompleteLesson] = React.useState<string>("false");
-  const [isComplete, setIsComplete] = React.useState(false);
+  const [valuesAsk, setValuesAsk] = React.useState({
+    title: "",
+    details: "",
+  });
+  const handleChangeValuesAsk = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setValuesAsk((prevState) => ({
+      ...prevState,
+      [name]: value,
+    }));
+  };
 
   const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -131,51 +160,99 @@ export default function CourseUserPage() {
   const handlePreviewVideo = (item: any) => {
     setPreview(item.video);
     sessionStorage.setItem("video", item.video);
-    setCompleteLesson(item.completed);
-    sessionStorage.setItem("isCompleted", item.completed.toString());
   };
-  const handleIdMarkDone = async () => {
-    const filter = course?.lessions?.filter(
-      (item: any) => item.video == preview
-    );
-    const id = filter[0].id;
 
-    try {
-      const body = {
-        lessonId: filter[0].id,
-        courseId: filter[0].courseId,
-        completed: true,
-      };
-      await markCompleteAPI(body);
-      setIsComplete(true);
-      setCourse((prev: any) => {
-        const findId = prev.lessions.filter((item: any) => item.id == id);
-        findId[0].completed = true;
-        return { ...prev };
-      });
-    } catch (error: any) {
-      errorToast(error.response.data.message, 2000);
-    }
+  const handleIdMarkDone = async () => {
+    const body: any = {
+      courseId: Number(id),
+      userId: accInfo.id,
+      lessionId: Number(router?.query?.lesson),
+      completed: true,
+    };
+    const res = await createLessonOfCourseAPI(body);
+    setLessonCompleted([...lessonComplete, res.data]);
   };
 
   const handleVideoEnded = () => {
     setIsEnded(true);
-    sessionStorage.setItem("isCompleted", "true");
-    setIsComplete(true);
+  };
+
+  const handleCreateQuestion = async () => {
+    setLoading(true);
+    try {
+      const body = {
+        courseId: Number(router.query.id),
+        title: valuesAsk.title,
+        details: valuesAsk.details,
+      };
+
+      await createQuestionAPI(body);
+      successToast(
+        "create question successfully just wait 10 minutes to see your question",
+        4000
+      );
+    } catch (error: any) {
+      errorToast(error.response.data.message, 2000);
+    } finally {
+      setLoading(false);
+      setValuesAsk({
+        title: "",
+        details: "",
+      });
+      setIsAsk(false);
+    }
+  };
+
+  const handleRowReply = (idQues: number) => {
+    setIsReply(true);
+    setQuesId(idQues);
+    setReply("");
+  };
+
+  const handleReplyBack = async (idQues: number) => {
+    try {
+      const body = {
+        courseId: Number(id),
+        questionId: idQues,
+        userId: accInfo.id,
+        details: reply,
+      };
+      const res = await replyBackOfQuestionsAPI(body);
+      const newRes = {
+        ...res.data,
+        user: {
+          id: accInfo.id,
+          name: accInfo.name,
+          email: accInfo.email,
+          picture: accInfo.picture,
+        },
+      };
+      let newData = [...questions];
+      const index = newData.findIndex((item) => item.id == idQues);
+      newData[index].replies = [...newData[index].replies, newRes];
+      setQuestions(newData);
+    } catch (error: any) {
+      errorToast(error.response.data.message, 2000);
+    } finally {
+      setIsReply(false);
+      setReply("");
+    }
   };
 
   React.useEffect(() => {
     (async () => {
       try {
-        if (typeof id === "string") {
+        if (id !== undefined) {
           const res = await getCourseUserByIdAPI(id);
+          const data = await getAllQuestionsAPI(id);
+          const lesson = await getLessonCompleteOfUser(id);
+          setLessonCompleted(lesson.data);
+          setQuestions(data.data);
           setCourse(res.data);
-        } else {
-          return null;
         }
       } catch (error: any) {
         errorToast(error.response.data.message, 2000);
-        router.replace("/dashboard/overall");
+        router.replace("/");
       }
     })();
     if (router?.query?.lesson) {
@@ -192,33 +269,20 @@ export default function CourseUserPage() {
     }
   }, [isEnded]);
 
-  React.useEffect(() => {
-    const isCom = sessionStorage.getItem("isCompleted");
-    setCompleteLesson(isCom || "");
-    setIsComplete(false);
-  }, [compelteLesson]);
-
-  React.useEffect(() => {
-    const findCourse = accInfo?.courses?.filter((item: any) => item.id == id);
-    if (findCourse?.length == 0 && id != undefined) {
-      errorToast("course not found", 2000);
-      router.replace("/dashboard/overall");
-    }
-  }, [id]);
   return (
     <ThemeProvider theme={defaultTheme}>
       <Box sx={{ display: "flex" }}>
         <CssBaseline />
-        <AppBar position="absolute" open={open}>
+        <AppBar position='absolute' open={open} sx={{ background: "black" }}>
           <Toolbar
             sx={{
               pr: "24px",
             }}
           >
             <IconButton
-              edge="start"
-              color="inherit"
-              aria-label="open drawer"
+              edge='start'
+              color='inherit'
+              aria-label='open drawer'
               onClick={toggleDrawer}
               sx={{
                 marginRight: "36px",
@@ -228,38 +292,40 @@ export default function CourseUserPage() {
               <MenuIcon />
             </IconButton>
             <Typography
-              component="h1"
-              variant="h6"
-              color="inherit"
+              component='h1'
+              variant='h6'
+              color='inherit'
               noWrap
               sx={{ flexGrow: 1, textTransform: "capitalize" }}
             >
               {course.name}
             </Typography>
-            <Button
-              variant="text"
-              sx={{ color: "white" }}
-              onClick={() => setOpenReview(true)}
-            >
-              Review Course
-            </Button>
+            {isReview && (
+              <Button
+                variant='text'
+                sx={{ color: "white" }}
+                onClick={() => setOpenReview(true)}
+              >
+                Review Course
+              </Button>
+            )}
             <Box>
               <MyProcess course={course} />
             </Box>
             {auth && (
               <div>
                 <IconButton
-                  size="large"
-                  aria-label="account of current user"
-                  aria-controls="menu-appbar"
-                  aria-haspopup="true"
+                  size='large'
+                  aria-label='account of current user'
+                  aria-controls='menu-appbar'
+                  aria-haspopup='true'
                   onClick={handleMenu}
-                  color="inherit"
+                  color='inherit'
                 >
                   <Avatar src={accInfo.picture || ""} />
                 </IconButton>
                 <Menu
-                  id="menu-appbar"
+                  id='menu-appbar'
                   anchorEl={anchorEl}
                   anchorOrigin={{
                     vertical: "top",
@@ -276,7 +342,7 @@ export default function CourseUserPage() {
                   <MenuItem
                     onClick={() => {
                       handleClose();
-                      router.push("/dashboard/profile");
+                      router.push("/profile/settings");
                     }}
                   >
                     Profile
@@ -287,17 +353,22 @@ export default function CourseUserPage() {
             )}
           </Toolbar>
         </AppBar>
-        <Drawer variant="permanent" open={open}>
+        <Drawer variant='permanent' open={open}>
           <Toolbar
             sx={{
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
               px: [1],
+              background: "black",
+              color: "white",
             }}
           >
-            <Typography variant="h5">Course content </Typography>
-            <IconButton onClick={() => router.push("/dashboard/overall")}>
+            <Typography variant='h5'>Course content </Typography>
+            <IconButton
+              onClick={() => router.push("/profile/mycourses")}
+              sx={{ color: "white" }}
+            >
               <HomeIcon />
             </IconButton>
           </Toolbar>
@@ -326,7 +397,7 @@ export default function CourseUserPage() {
                 >
                   <ListItemText
                     sx={{
-                      color: router.query.lesson == item.id ? "white" : "black",
+                      color: router.query.lesson == item.id ? "white" : "white",
                       fontWeight: 900,
                       whiteSpace: "initial",
                       zIndex: 10,
@@ -334,10 +405,19 @@ export default function CourseUserPage() {
                   >
                     {item.name}
                   </ListItemText>
-                  {item.completed ? (
-                    <CheckCircleIcon sx={{ color: "green" }} />
-                  ) : (
+
+                  {lessonComplete.filter((val) => val.lessionId == item.id)
+                    .length == 0 ? (
                     <CancelIcon sx={{ color: "red" }} />
+                  ) : (
+                    lessonComplete
+                      .filter((val) => val.lessionId == item.id)
+                      .map((item) => (
+                        <CheckCircleIcon
+                          sx={{ color: "green" }}
+                          key={item.id}
+                        />
+                      ))
                   )}
                 </Stack>
               </ListItem>
@@ -345,7 +425,7 @@ export default function CourseUserPage() {
           </List>
         </Drawer>
         <Box
-          component="main"
+          component='main'
           sx={{
             backgroundColor: (theme) =>
               theme.palette.mode === "light"
@@ -357,12 +437,24 @@ export default function CourseUserPage() {
           }}
         >
           <Toolbar />
-          <Container maxWidth="xl" sx={{ mt: 4 }}>
+          <Container maxWidth='xl' sx={{ mt: 4 }}>
             <Grid container>
               <Grid item xs={12}>
                 {preview ? (
                   <Box>
-                    {compelteLesson == "true" || isComplete ? (
+                    {lessonComplete.filter(
+                      (val) => val.lessionId == router?.query.lesson
+                    ).length == 0 ? (
+                      <Alert
+                        severity='error'
+                        onClick={() => handleIdMarkDone()}
+                        sx={{
+                          cursor: "pointer",
+                        }}
+                      >
+                        Mark Complete
+                      </Alert>
+                    ) : (
                       <Alert
                         sx={{
                           background: "rgba(41, 235, 128, 0.9)",
@@ -372,37 +464,165 @@ export default function CourseUserPage() {
                       >
                         Completed
                       </Alert>
-                    ) : (
-                      <Alert
-                        severity="error"
-                        onClick={() => handleIdMarkDone()}
-                        sx={{
-                          cursor: "pointer",
-                        }}
-                      >
-                        Mark Complete
-                      </Alert>
                     )}
                     :
-                    <ReactPlayer
-                      url={preview}
-                      width={"100%"}
-                      height={"740px"}
-                      controls={true}
-                      onProgress={(e) => setPlayed(e.loadedSeconds)}
-                      onEnded={handleVideoEnded}
-                    />
+                    <Box>
+                      <ReactPlayer
+                        url={preview}
+                        width={"100%"}
+                        height={"400px"}
+                        controls={true}
+                        onProgress={(e) => setPlayed(e.loadedSeconds)}
+                        onEnded={handleVideoEnded}
+                      />
+                      <Box mt={5}>
+                        <Typography variant='h4'>Q&A</Typography>
+                        <Typography variant='h5' sx={{ mt: 2 }}>
+                          {`All questions in this course (${questions.length})`}
+                        </Typography>
+                        <Box mt={3} mb={3}>
+                          <Button
+                            variant='text'
+                            onClick={() => setIsAsk((prev) => !prev)}
+                          >
+                            Ask a new question
+                          </Button>
+                          {isAsk && (
+                            <Box>
+                              <Typography variant='h6'>Title</Typography>
+                              <TextField
+                                size='small'
+                                sx={{ width: 600 }}
+                                name='title'
+                                value={valuesAsk.title}
+                                onChange={handleChangeValuesAsk}
+                              />
+                              <Typography variant='h6'>Detail</Typography>
+                              <TextField
+                                multiline
+                                maxRows={6}
+                                size='small'
+                                sx={{ width: 600 }}
+                                name='details'
+                                value={valuesAsk.details}
+                                onChange={handleChangeValuesAsk}
+                              />
+                              <Box sx={{ mt: 2 }}>
+                                <Button
+                                  size='small'
+                                  variant='contained'
+                                  sx={{ width: 250 }}
+                                  onClick={handleCreateQuestion}
+                                >
+                                  Submit
+                                </Button>
+                              </Box>
+                            </Box>
+                          )}
+                        </Box>
+                        {questions.map((item) => (
+                          <Paper sx={{ p: 2, mb: 2 }} key={item.id}>
+                            <Stack flexDirection={"row"} gap={2} mt={3}>
+                              <Avatar
+                                src={item.user.picture || ""}
+                                sx={{ width: 50, height: 50 }}
+                              />
+                              <Box>
+                                <Typography fontWeight={700} variant='h6'>
+                                  {item.title}
+                                </Typography>
+                                <Typography>{item.details}</Typography>
+                                <Stack flexDirection={"row"} gap={2}>
+                                  <Typography sx={{ color: "purple" }}>
+                                    {item.user.name}
+                                  </Typography>
+                                  <Typography>
+                                    {dayjs(item.createdAt).fromNow()}
+                                  </Typography>
+                                </Stack>
+                                {item.replies.map((reply: any) => (
+                                  <Paper
+                                    sx={{
+                                      ml: 2,
+                                      p: 2,
+                                      mb: 2,
+                                      mt: 2,
+                                      background: "rgba(43, 42, 42, 0.117)",
+                                    }}
+                                    key={reply.id}
+                                  >
+                                    <Box>
+                                      <Stack flexDirection={"row"} gap={2}>
+                                        <Avatar
+                                          src={reply?.user?.picture || ""}
+                                          sx={{ width: 30, height: 30 }}
+                                        />
+                                        <Typography sx={{ color: "purple" }}>
+                                          {reply?.user?.name}
+                                        </Typography>
+                                        <Typography>
+                                          {dayjs(reply.createdAt).fromNow()}
+                                        </Typography>
+                                      </Stack>
+                                      <Typography>{reply.details}</Typography>
+                                    </Box>
+                                  </Paper>
+                                ))}
+
+                                <Box sx={{ mt: 2 }}>
+                                  <Button
+                                    onClick={() => handleRowReply(item.id)}
+                                  >
+                                    Reply
+                                  </Button>
+                                  {IsReply && item.id == quesId && (
+                                    <Box>
+                                      <TextField
+                                        multiline
+                                        maxRows={6}
+                                        size='small'
+                                        sx={{ width: 600 }}
+                                        value={reply}
+                                        onChange={(e) =>
+                                          setReply(e.target.value)
+                                        }
+                                      />
+                                      <Box sx={{ mt: 2 }}>
+                                        <Button
+                                          size='small'
+                                          variant='contained'
+                                          sx={{ width: 250 }}
+                                          onClick={() =>
+                                            handleReplyBack(item.id)
+                                          }
+                                        >
+                                          Submit
+                                        </Button>
+                                      </Box>
+                                    </Box>
+                                  )}
+                                </Box>
+                              </Box>
+                            </Stack>
+                          </Paper>
+                        ))}
+                      </Box>
+                    </Box>
                   </Box>
                 ) : (
-                  <Stack
-                    sx={{ height: "70vh" }}
-                    flexDirection={"column"}
-                    alignItems={"center"}
-                    justifyContent={"center"}
-                  >
-                    <PlayCircleIcon sx={{ fontSize: 80, color: "blue" }} />
-                    <Typography variant="h4">Click Lesson To Watch</Typography>
-                  </Stack>
+                  <Box>
+                    <Stack
+                      sx={{ height: "70vh" }}
+                      flexDirection={"column"}
+                      alignItems={"center"}
+                      justifyContent={"center"}
+                    >
+                      <PlayCircleIcon sx={{ fontSize: 80, color: "blue" }} />
+                      <Typography variant='h4'>
+                        Click Lesson To Watch
+                      </Typography>
+                    </Stack>
+                  </Box>
                 )}
               </Grid>
             </Grid>
@@ -413,6 +633,7 @@ export default function CourseUserPage() {
         openReview={openReview}
         setOpenReview={setOpenReview}
         course={course}
+        setIsReview={setIsReview}
       />
     </ThemeProvider>
   );

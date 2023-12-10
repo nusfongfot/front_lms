@@ -8,6 +8,7 @@ import {
   Box,
   Button,
   Grid,
+  Paper,
   Stack,
   TextField,
   Typography,
@@ -124,50 +125,50 @@ function ProfileComponent({}: Props) {
     }
   }, [values]);
   return (
-    <Box>
-      <Typography variant="h4">Edit Profile</Typography>
+    <Paper sx={{ p: 2 }}>
+      <Typography variant='h4'>Edit Profile</Typography>
       <Grid container>
         <Grid item xs={12} sm={6}>
-          <Typography mt={5} variant="h6">
+          <Typography mt={5} variant='h6'>
             Name
           </Typography>
           <TextField
-            size="small"
+            size='small'
             sx={{ width: 500 }}
-            name="name"
+            name='name'
             value={values.name}
             onChange={handleChangeValues}
           />
-          <Typography variant="h6">Email</Typography>
+          <Typography variant='h6'>Email</Typography>
           <TextField
-            size="small"
+            size='small'
             sx={{ width: 500 }}
-            name="email"
+            name='email'
             value={values.email}
             onChange={handleChangeValues}
           />
-          <Typography variant="h6">Password</Typography>
+          <Typography variant='h6'>Password</Typography>
           <TextField
-            size="small"
+            size='small'
             sx={{ width: 500 }}
-            name="password"
+            name='password'
             value={values.password}
             onChange={handleChangeValues}
-            type="password"
+            type='password'
           />
-          <Typography variant="h6">ConfirmPassword</Typography>
+          <Typography variant='h6'>ConfirmPassword</Typography>
           <TextField
-            size="small"
+            size='small'
             sx={{ width: 500 }}
-            name="confirm_password"
+            name='confirm_password'
             value={values.confirm_password}
             onChange={handleChangeValues}
-            type="password"
+            type='password'
           />
           <Box mt={2}>
             <Button
-              variant="contained"
-              size="small"
+              variant='contained'
+              size='small'
               sx={{ width: 200 }}
               onClick={handleEditProfile}
               disabled={isShow}
@@ -178,11 +179,11 @@ function ProfileComponent({}: Props) {
         </Grid>
         <Grid item xs={12} sm={6}>
           <Box mt={5} />
-          <Typography mb={2}>Upload Image</Typography>
+          <Typography mb={2}>Choose Image</Typography>
 
           <input
-            type="file"
-            accept="image/jpeg, image/png"
+            type='file'
+            accept='image/jpeg, image/png'
             style={{ display: "none" }}
             ref={fileRef}
             onChange={handleImage}
@@ -211,21 +212,21 @@ function ProfileComponent({}: Props) {
           {preview && (
             <Stack flexDirection={"row"} gap={1}>
               <Button
-                size="small"
-                variant="contained"
-                color="error"
+                size='small'
+                variant='contained'
+                color='error'
                 onClick={handleCancelImage}
               >
                 cancel
               </Button>
-              <Button size="small" variant="contained" onClick={handleSave}>
+              <Button size='small' variant='contained' onClick={handleSave}>
                 save
               </Button>
             </Stack>
           )}
         </Grid>
       </Grid>
-    </Box>
+    </Paper>
   );
 }
 export default ProfileComponent;

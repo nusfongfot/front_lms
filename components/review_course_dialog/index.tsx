@@ -12,6 +12,7 @@ import useInfo from "@/zustand/auth";
 
 type Props = {
   openReview: boolean;
+  setIsReview: React.Dispatch<React.SetStateAction<boolean>>;
   setOpenReview: React.Dispatch<React.SetStateAction<boolean>>;
   course: any;
 };
@@ -20,15 +21,15 @@ export default function ReviewCouseUserDiaolog({
   setOpenReview,
   openReview,
   course,
+  setIsReview,
 }: Props) {
-  const { accInfo } = useInfo()
-  const [starValue, setStarValue] = useState<number>(1);  
+  const { accInfo } = useInfo();
+  const [starValue, setStarValue] = useState<number>(1);
   const [detail, setDetail] = useState("");
   const [loadingBtn, setLoadingBtn] = useState(false);
   const courseId = course?.lessions?.map((item: any) => item.courseId)[0];
 
   const handleClickReview = async () => {
-    
     setLoadingBtn(true);
     try {
       const body = {
@@ -46,28 +47,31 @@ export default function ReviewCouseUserDiaolog({
       setOpenReview(false);
       setDetail("");
       setStarValue(1);
+      setIsReview(false);
     }
   };
-  
+
   return (
     <Dialog
       open={openReview}
       onClose={() => setOpenReview(false)}
-      aria-labelledby="alert-dialog-title"
-      aria-describedby="alert-dialog-description"
+      aria-labelledby='alert-dialog-title'
+      aria-describedby='alert-dialog-description'
     >
-      <DialogTitle id="alert-dialog-title">{"Review Course"}</DialogTitle>
+      <DialogTitle id='alert-dialog-title'>{"Review Course"}</DialogTitle>
       <Box sx={{ width: 600, p: 2 }}>
         <Box>
           <Typography mb={1}>Choose Star</Typography>
           <Rating
             defaultValue={1}
             value={starValue}
-            onChange={(e, newValue: number | null) => setStarValue(newValue || 0)}
+            onChange={(e, newValue: number | null) =>
+              setStarValue(newValue || 0)
+            }
           />
           <Typography mt={2}>Detail</Typography>
           <TextField
-            size="small"
+            size='small'
             multiline
             maxRows={5}
             fullWidth
@@ -79,18 +83,18 @@ export default function ReviewCouseUserDiaolog({
       <DialogActions>
         <Button
           onClick={() => setOpenReview(false)}
-          variant="contained"
-          size="small"
-          color="error"
+          variant='contained'
+          size='small'
+          color='error'
         >
           cancel
         </Button>
         <LoadingButton
           loading={loadingBtn}
-          loadingPosition="start"
+          loadingPosition='start'
           startIcon={<AddCircleIcon />}
-          variant="contained"
-          size="small"
+          variant='contained'
+          size='small'
           onClick={handleClickReview}
         >
           Review

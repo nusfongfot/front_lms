@@ -2,13 +2,10 @@ import { useRouter } from "next/router";
 import CreateCourse from "./create_course";
 import InstructorMyCourse from "./mycourse";
 import CourseCompoent from "./course";
-import useInfo from "@/zustand/auth";
-import { useEffect } from "react";
 import InstructorDashBoard from "./overall";
 
 type Props = {};
 function InstructorComponent({}: Props) {
-  const { accInfo } = useInfo();
   const router = useRouter();
 
   const selectPage = () => {
@@ -25,16 +22,6 @@ function InstructorComponent({}: Props) {
       return <CourseCompoent />;
     }
   };
-
-  useEffect(() => {
-    if (accInfo.role !== "instructor") {
-      router.replace("/dashboard/overall");
-    }
-  }, [accInfo.role]);
-
-  if (accInfo.role !== "instructor") {
-    return null;
-  }
 
   return <div>{selectPage()}</div>;
 }

@@ -1,5 +1,5 @@
 import SimpleBackdrop from "@/components/loading";
-import "@/styles/globals.css";
+import "@/styles/globals.scss";
 import type { AppProps } from "next/app";
 import Head from "next/head";
 import { ToastContainer } from "react-toastify";
@@ -11,11 +11,11 @@ import { errorToast } from "@/utils/notification";
 import { useRouter } from "next/router";
 import useInfo from "@/zustand/auth";
 import { deleteCookie } from "cookies-next";
+import { useLoading } from "@/zustand/loading";
 
 export default function App({ Component, pageProps }: AppProps) {
   const router = useRouter();
   const { setInfo, accInfo } = useInfo();
-
   useEffect(() => {
     (async () => {
       try {

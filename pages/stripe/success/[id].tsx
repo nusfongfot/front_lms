@@ -18,27 +18,24 @@ function StripeSuccessPage({}: Props) {
     (async () => {
       setLoading(true);
       try {
-        const res = await stripePaidSuccussAPI(id);
-
-        if (res.course) {
-          if (id !== undefined) {
-            router.replace(`/user/course/${id}`);
-            setInfo({
-              ...accInfo,
-              courses: [res.course, ...accInfo.courses],
-            });
-          }
+        if (id !== undefined) {
+          const res = await stripePaidSuccussAPI(id);
+          router.replace(`/user/course/${id}`);
+          setInfo({
+            ...accInfo,
+            courses: [res.course],
+          });
         }
       } catch (error: any) {
         errorToast(error.message, 2000);
-        router.replace("/dashboard/overall");
+        router.replace("/");
       } finally {
         setLoading(false);
       }
     })();
   }, [id]);
   return (
-    <Container maxWidth="xl">
+    <Container maxWidth='xl'>
       <Stack
         flexDirection={"column"}
         alignItems={"center"}
@@ -46,7 +43,7 @@ function StripeSuccessPage({}: Props) {
         minHeight={"100vh"}
       >
         <PaidIcon sx={{ width: 150, height: 150, color: "green" }} />
-        <Typography variant="h4" mb={2}>
+        <Typography variant='h4' mb={2}>
           Payment Successfully
         </Typography>
       </Stack>

@@ -215,9 +215,9 @@ function CourseCompoent({}: Props) {
   return (
     <Box>
       <Button
-        variant="contained"
-        size="small"
-        onClick={() => router.push("/dashboard/instructor?subpath=mycourse")}
+        variant='contained'
+        size='small'
+        onClick={() => router.push("/instructor/overall?subpath=mycourse")}
       >
         back
       </Button>
@@ -229,15 +229,15 @@ function CourseCompoent({}: Props) {
               style={{ width: 80, height: 80, borderRadius: "50%" }}
             />
             <Box>
-              <Typography variant="h5">{course?.name}</Typography>
-              <Typography variant="h6">0 Lessions</Typography>
+              <Typography variant='h5'>{course?.name}</Typography>
+              <Typography variant='h6'>0 Lessions</Typography>
             </Box>
           </Stack>
           <Stack flexDirection={"row"} gap={2}>
-            <Tooltip title={`${stuedents.length} Enrolled`} placement="top">
+            <Tooltip title={`${stuedents.length} Enrolled`} placement='top'>
               <PersonIcon sx={{ color: "green", cursor: "pointer" }} />
             </Tooltip>
-            <Tooltip title="Edit" placement="top">
+            <Tooltip title='Edit' placement='top'>
               <EditIcon
                 sx={{ color: "orange", cursor: "pointer" }}
                 onClick={handleClickOpenEditCourse}
@@ -245,14 +245,14 @@ function CourseCompoent({}: Props) {
             </Tooltip>
 
             {course.published ? (
-              <Tooltip title="Unpublish" placement="top">
+              <Tooltip title='Unpublish' placement='top'>
                 <CloseIcon
                   sx={{ color: "red", cursor: "pointer" }}
                   onClick={handleUnPublishCourse}
                 />
               </Tooltip>
             ) : (
-              <Tooltip title="Publish" placement="top">
+              <Tooltip title='Publish' placement='top'>
                 <CheckIcon
                   sx={{ color: "green", cursor: "pointer" }}
                   onClick={handlePublishCourse}
@@ -269,8 +269,8 @@ function CourseCompoent({}: Props) {
           />
         </Box>
         <Button
-          variant="contained"
-          size="small"
+          variant='contained'
+          size='small'
           startIcon={<AddIcon />}
           onClick={handleClickOpenAdd}
         >
@@ -278,7 +278,7 @@ function CourseCompoent({}: Props) {
         </Button>
       </Box>
       <Box mt={3}>
-        <Typography variant="h5">{lessions.length | 0} Lesson</Typography>
+        <Typography variant='h5'>{lessions.length | 0} Lesson</Typography>
         {lessions.map((item, i) => (
           <Box key={i} mt={2} onDragOver={(e) => e.preventDefault()}>
             <Stack flexDirection={"row"} justifyContent={"space-between"}>
@@ -297,13 +297,13 @@ function CourseCompoent({}: Props) {
                   onDrop={(e) => handleDrop(e, i)}
                   draggable
                 >
-                  <Typography variant="h5">{i + 1}</Typography>
+                  <Typography variant='h5'>{i + 1}</Typography>
                 </Stack>
-                <Typography variant="h5">{item.name}</Typography>
+                <Typography variant='h5'>{item.name}</Typography>
               </Stack>
               <Stack flexDirection={"row"} gap={1}>
                 <button
-                  className="btn_del"
+                  className='btn_del'
                   onClick={() => handleDelete(item.id)}
                 >
                   X

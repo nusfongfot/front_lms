@@ -8,6 +8,7 @@ import {
 } from "@/api/instructor";
 import { useLoading } from "@/zustand/loading";
 import { errorToast } from "@/utils/notification";
+import { deleteCookie } from "cookies-next";
 
 type Props = {};
 function InstructorDashBoard({}: Props) {
@@ -33,11 +34,13 @@ function InstructorDashBoard({}: Props) {
         setBalance(res.data.pending);
       } catch (error: any) {
         errorToast(error.response.data.message, 2000);
+        deleteCookie("token");
+        localStorage.removeItem("tokenLms");
+        window.location.replace("/");
       }
       setLoading(false);
     })();
   }, []);
-  console.log(balance);
   return (
     <Box>
       <Paper sx={{ p: 2 }}>

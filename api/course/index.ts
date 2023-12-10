@@ -6,6 +6,18 @@ export const getAllCoursesAPI = async () => {
   return data;
 };
 
+export const getCourseByFillterAPI = async (type: string, cate: string) => {
+  const link = `/user/course/filter?type=${type}&cate=${cate}`;
+  const { data } = await apiFetch.get(link);
+  return data;
+};
+
+export const getCourseBySearch = async (type: string) => {
+  const link = `/user/course/search?q=${type}`;
+  const { data } = await apiFetch.get(link);
+  return data;
+};
+
 export const createCourseAPI = async (body: object) => {
   const link = "/course/insert";
   const { data } = await apiFetch.post(link, body);
@@ -105,5 +117,17 @@ export const getCourseBrowseByIdAPI = async (id: string) => {
 export const markCompleteAPI = async (body: object) => {
   const link = `/user/complete`;
   const { data } = await apiFetch.put(link, body);
+  return data;
+};
+
+export const getLessonCompleteOfUser = async (courseId: string) => {
+  const link = `/user/complete/${courseId}`;
+  const { data } = await apiFetch.get(link);
+  return data;
+};
+
+export const createLessonOfCourseAPI = async (body: object) => {
+  const link = `/user/complete`;
+  const { data } = await apiFetch.post(link, body);
   return data;
 };
