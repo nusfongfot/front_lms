@@ -7,12 +7,11 @@ import { Box, Button, Menu, Typography } from "@mui/material";
 
 type Props = {
   course: any;
+  lessonComplete: any[];
 };
 
-export default function MyProcess({ course }: Props) {
-  const findComplete = course?.lessions?.filter(
-    (item: any) => item.completed == true
-  ).length;
+export default function MyProcess({ course, lessonComplete }: Props) {
+  const findComplete = lessonComplete.length
   const findLengthCourse = course?.lessions?.length;
   const [progress, setProgress] = React.useState(0);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
@@ -28,10 +27,10 @@ export default function MyProcess({ course }: Props) {
     setProgress((findComplete / findLengthCourse) * 100);
   }, [findComplete]);
   return (
-    <Stack spacing={2} direction="row" alignItems={"center"}>
-      <Box position="relative" display="inline-flex">
+    <Stack spacing={2} direction='row' alignItems={"center"}>
+      <Box position='relative' display='inline-flex'>
         <CircularProgress
-          variant="determinate"
+          variant='determinate'
           sx={{ color: "purple" }}
           value={progress | 0}
         />
@@ -40,17 +39,17 @@ export default function MyProcess({ course }: Props) {
           left={0}
           bottom={0}
           right={0}
-          position="absolute"
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
+          position='absolute'
+          display='flex'
+          alignItems='center'
+          justifyContent='center'
         >
           <EmojiEventsIcon />
         </Box>
       </Box>
 
       <Button
-        variant="text"
+        variant='text'
         sx={{ color: "white" }}
         onClick={handleClick}
         endIcon={<KeyboardArrowDownIcon />}
@@ -59,14 +58,14 @@ export default function MyProcess({ course }: Props) {
       </Button>
 
       <Menu
-        id="demo-positioned-menu"
-        aria-labelledby="demo-positioned-button"
+        id='demo-positioned-menu'
+        aria-labelledby='demo-positioned-button'
         anchorEl={anchorEl}
         open={open}
         onClose={handleClose}
       >
         <Box sx={{ p: 2 }}>
-          <Typography variant="h6">{`success ${findComplete} from ${findLengthCourse}`}</Typography>
+          <Typography variant='h6'>{`success ${findComplete} from ${findLengthCourse}`}</Typography>
         </Box>
       </Menu>
     </Stack>

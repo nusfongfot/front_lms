@@ -10,7 +10,7 @@ import { getProfileAPI } from "@/api/profile";
 import { errorToast } from "@/utils/notification";
 import { useRouter } from "next/router";
 import useInfo from "@/zustand/auth";
-import { deleteCookie } from "cookies-next";
+import { deleteCookie, getCookie } from "cookies-next";
 import { useLoading } from "@/zustand/loading";
 
 export default function App({ Component, pageProps }: AppProps) {
@@ -18,6 +18,11 @@ export default function App({ Component, pageProps }: AppProps) {
   const { setInfo, accInfo } = useInfo();
   useEffect(() => {
     (async () => {
+      if (!getCookie("token")) {
+        router.push("/");
+        deleteCookie("token");
+        localStorage.removeItem("tokenLms");
+      }
       try {
         if (typeof window !== "undefined" && localStorage.getItem("tokenLms")) {
           const res = await getProfileAPI();

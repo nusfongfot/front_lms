@@ -310,7 +310,7 @@ export default function CourseUserPage() {
               </Button>
             )}
             <Box>
-              <MyProcess course={course} />
+              <MyProcess course={course} lessonComplete={lessonComplete} />
             </Box>
             {auth && (
               <div>

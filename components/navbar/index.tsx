@@ -74,7 +74,7 @@ export default function MyNavBar() {
   const { accInfo } = useInfo();
 
   const [search, setSearch] = React.useState<string>("");
-  const newValueSearch = search.replace(/\s/g, '&')
+  const newValueSearch = search.replace(/\s/g, "&");
 
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [anchorCart, setAnchorCart] = React.useState<null | HTMLElement>(null);
@@ -240,6 +240,7 @@ export default function MyNavBar() {
       </Box>
     </Menu>
   );
+
   return (
     <Box sx={{ flexGrow: 1, mb: 8 }}>
       <AppBar position='fixed' sx={{ background: "black" }}>

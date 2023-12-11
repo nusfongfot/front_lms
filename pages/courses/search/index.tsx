@@ -1,13 +1,10 @@
-import CardCoursesService from "@/components/service-ui/card-courses";
 import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
-  Box,
   Container,
   FormControl,
   FormControlLabel,
-  FormLabel,
   Grid,
   Radio,
   RadioGroup,
@@ -110,19 +107,20 @@ function CoursesPage({}: Props) {
 
   useEffect(() => {
     (async () => {
-      setLoading(true);
       if (router?.query?.q) {
+        setLoading(true);
         try {
           const res = await getCourseBySearch(router?.query?.q as string);
           setCourses(res.data);
         } catch (error: any) {
           errorToast(error.response.data.message, 2000);
+        } finally {
+          setLoading(false);
         }
-        setLoading(false);
       }
     })();
   }, [router?.query?.q]);
-
+  
   return (
     <LayoutUser>
       <BackToTop />
