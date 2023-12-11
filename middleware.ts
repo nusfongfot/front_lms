@@ -20,6 +20,5 @@ export const config = {
     "/user/:path*",
     "/stripe/:path*",
     "/profile/:path*",
-    "/courses/:path*",
   ],
 };

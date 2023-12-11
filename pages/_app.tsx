@@ -18,7 +18,7 @@ export default function App({ Component, pageProps }: AppProps) {
   const { setInfo, accInfo } = useInfo();
   useEffect(() => {
     (async () => {
-      if (!getCookie("token")) {
+      if (!getCookie("token") && localStorage.getItem("tokenLms")) {
         router.push("/");
         deleteCookie("token");
         localStorage.removeItem("tokenLms");
