@@ -20,7 +20,7 @@ function StripeCanCelPage({}: Props) {
         <Button
           variant="contained"
           size="small"
-          onClick={() => router.replace("/dashboard/overall")}
+          onClick={() => router.replace("/")}
         >
           back to home
         </Button>
