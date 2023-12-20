@@ -33,8 +33,7 @@ export default function MySignInPage() {
       };
       const res = await loginAPI(body);
       successToast(res.message, 2000);
-      setCookie("token", res.token.substring(0, 2000));
-      localStorage.setItem("tokenLms", res.token);
+      setCookie("token", res.token);
       router.replace("/");
     } catch (error: any) {
       errorToast(error.response.data.message, 2000);

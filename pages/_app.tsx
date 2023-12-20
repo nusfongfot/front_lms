@@ -10,7 +10,7 @@ import { getProfileAPI } from "@/api/profile";
 import { errorToast } from "@/utils/notification";
 import { useRouter } from "next/router";
 import useInfo from "@/zustand/auth";
-import { deleteCookie, getCookie } from "cookies-next";
+import { deleteCookie, getCookie, getCookies } from "cookies-next";
 import { useLoading } from "@/zustand/loading";
 
 export default function App({ Component, pageProps }: AppProps) {
@@ -18,21 +18,16 @@ export default function App({ Component, pageProps }: AppProps) {
   const { setInfo, accInfo } = useInfo();
   useEffect(() => {
     (async () => {
-      if (!getCookie("token") && localStorage.getItem("tokenLms")) {
-        router.push("/");
-        deleteCookie("token");
-        localStorage.removeItem("tokenLms");
-      }
       try {
-        if (typeof window !== "undefined" && localStorage.getItem("tokenLms")) {
+        const { token } = getCookies("token" as any);
+        if (token) {
           const res = await getProfileAPI();
           setInfo(res.data);
         }
       } catch (error: any) {
-        errorToast(error.response.data.message, 2000);
+        errorToast(error?.response?.data?.message, 2000);
         router.push("/");
         deleteCookie("token");
-        localStorage.removeItem("tokenLms");
       }
     })();
   }, [accInfo.id]);

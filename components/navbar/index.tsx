@@ -112,7 +112,6 @@ export default function MyNavBar() {
 
   const handleLogOut = async () => {
     deleteCookie("token");
-    localStorage.removeItem("tokenLms");
     window.location.replace("/");
   };
 

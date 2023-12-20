@@ -175,7 +175,6 @@ export default function Layout({ children }: Props) {
 
   const handleLogOut = async () => {
     deleteCookie("token");
-    localStorage.removeItem("tokenLms");
     window.location.replace("/");
   };
 

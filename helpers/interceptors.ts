@@ -1,3 +1,4 @@
+import { errorToast } from "@/utils/notification";
 import axios from "axios";
 import { getCookies } from "cookies-next";
 
@@ -8,8 +9,7 @@ const apiFetch = axios.create({
 // Before Send Request
 apiFetch.interceptors.request.use(
   (request) => {
-    // const { token } = getCookies("token" as any) || "";
-    const token = localStorage.getItem("tokenLms");
+    const { token } = getCookies("token" as any) || "";
     request.headers["x-access-token"] = token;
     request.headers["x-platform"] = "WEB";
     request.headers["Accept-Language"] = "TH";
@@ -30,10 +30,7 @@ apiFetch.interceptors.response.use(
     return response;
   },
   (error) => {
-    // if (error.response.status == 404) {
-    //   window.location.replace("/dashboard/overall");
-    // }
-    return Promise.reject(error);
+    return errorToast(error.message, 2000);
   }
 );
 export default apiFetch;

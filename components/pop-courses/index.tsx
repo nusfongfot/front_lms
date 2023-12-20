@@ -21,7 +21,7 @@ function PopularCourse({}: Props) {
         const res = await getAllCoursesAPI();
         setCourses(res.data);
       } catch (error: any) {
-        errorToast(error.response.data.message, 2000);
+        errorToast(error?.response?.data?.message, 2000);
       }
       setLoading(false);
     })();

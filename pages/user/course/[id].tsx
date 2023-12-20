@@ -153,7 +153,6 @@ export default function CourseUserPage() {
 
   const handleLogOut = async () => {
     deleteCookie("token");
-    localStorage.removeItem("tokenLms");
     window.location.replace("/");
   };
 

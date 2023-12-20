@@ -6,7 +6,7 @@ import BackToTop from "@/components/scollTop";
 import { errorToast } from "@/utils/notification";
 import useInfo from "@/zustand/auth";
 import { Container } from "@mui/material";
-import { deleteCookie } from "cookies-next";
+import { deleteCookie, getCookies } from "cookies-next";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
 
@@ -17,15 +17,15 @@ function Home() {
   useEffect(() => {
     (async () => {
       try {
-        if (typeof window !== "undefined" && localStorage.getItem("tokenLms")) {
+        const { token } = getCookies("token" as any);
+        if (token) {
           const res = await getProfileAPI();
           setInfo(res.data);
         }
       } catch (error: any) {
-        errorToast(error.response.data.message, 2000);
+        errorToast(error?.response?.data?.message, 2000);
         router.push("/");
         deleteCookie("token");
-        localStorage.removeItem("tokenLms");
       }
     })();
   }, []);
