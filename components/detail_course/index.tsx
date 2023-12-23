@@ -1,12 +1,10 @@
 import {
   freeEnrollmentCourseAPI,
   getCourseBrowseByIdAPI,
-  getCourseByIdAPI,
   paidStripeCourseAPI,
 } from "@/api/course";
 import { errorToast, successToast } from "@/utils/notification";
 import {
-  Avatar,
   Box,
   Button,
   Divider,
@@ -14,7 +12,6 @@ import {
   Paper,
   Stack,
   Typography,
-  duration,
 } from "@mui/material";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -26,6 +23,7 @@ import ReactPlayer from "react-player";
 import ReviewDialog from "./review_dialog";
 import { loadStripe } from "@stripe/stripe-js";
 import { useLoading } from "@/zustand/loading";
+import dayjs from "dayjs";
 
 type Props = {};
 function DetailCourse({}: Props) {
@@ -36,7 +34,6 @@ function DetailCourse({}: Props) {
   const [lessons, setLessons] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
   const [openReview, setOpenReview] = useState(false);
-
   const [videoDurations, setVideoDurations] = useState<any>({});
   const totalMinutes: any = Object.values(videoDurations).reduce(
     (total: any, duration: any) => total + duration,
@@ -137,7 +134,9 @@ function DetailCourse({}: Props) {
             <Typography variant='h5'>
               {course.price == 0 ? "Free" : `${course.price} $`}
             </Typography>
-            <Typography>Last updated 10/2566</Typography>
+            <Typography>
+              Last updated {dayjs(course.updatedAt).format("YYYY-MM-DD")}
+            </Typography>
           </Stack>
         </Grid>
         <Grid item xs={12} md={3}>
