@@ -13,6 +13,7 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
+import ArrowRightIcon from "@mui/icons-material/ArrowRight";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import PreviewDialog from "./preview_dialog";
@@ -147,6 +148,20 @@ function DetailCourse({}: Props) {
                 width: "100%",
                 height: 160,
                 objectFit: "contain",
+                cursor: "pointer",
+                position: "relative",
+              }}
+              onClick={handleClickOpen}
+            />
+            <ArrowRightIcon
+              sx={{
+                background: "white",
+                borderRadius: "50%",
+                color: "black",
+                width: 50,
+                height: 50,
+                position: "absolute",
+                m: "55px",
                 cursor: "pointer",
               }}
               onClick={handleClickOpen}
