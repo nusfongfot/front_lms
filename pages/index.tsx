@@ -6,7 +6,7 @@ import BackToTop from "@/components/scollTop";
 import { errorToast } from "@/utils/notification";
 import useInfo from "@/zustand/auth";
 import { Container } from "@mui/material";
-import { deleteCookie, getCookies } from "cookies-next";
+import { deleteCookie, getCookie } from "cookies-next";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
 
@@ -17,7 +17,7 @@ function Home() {
   useEffect(() => {
     (async () => {
       try {
-        const { token } = getCookies("token" as any);
+        const  token  = getCookie("token");
         if (token) {
           const res = await getProfileAPI();
           setInfo(res.data);
