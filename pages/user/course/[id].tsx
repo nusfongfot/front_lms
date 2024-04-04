@@ -16,16 +16,18 @@ import {
   Alert,
   Avatar,
   Button,
+  FormControlLabel,
   ListItem,
   ListItemText,
   Menu,
   MenuItem,
+  NoSsr,
   Paper,
   Stack,
+  Switch,
   TextField,
 } from "@mui/material";
 import { useRouter } from "next/router";
-import { usePathname } from "next/navigation";
 import { errorToast, successToast } from "@/utils/notification";
 import { useLoading } from "@/zustand/loading";
 import { deleteCookie } from "cookies-next";
@@ -36,7 +38,6 @@ import {
   getLessonCompleteOfUser,
 } from "@/api/course";
 import ReactPlayer from "react-player";
-import PlayCircleIcon from "@mui/icons-material/PlayCircle";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
 import MyProcess from "@/components/process";
@@ -104,7 +105,6 @@ const Drawer = styled(MuiDrawer, {
 const defaultTheme = createTheme();
 
 export default function CourseUserPage() {
-  const path = usePathname();
   const router = useRouter();
   const id = router?.query?.id?.toString();
   const { accInfo } = useInfo();
@@ -115,17 +115,19 @@ export default function CourseUserPage() {
   const [lessonComplete, setLessonCompleted] = React.useState<any[]>([]);
 
   const [preview, setPreview] = React.useState("");
+  const [lessonId, setLessonId] = React.useState("");
   const [reply, setReply] = React.useState("");
   const [open, setOpen] = React.useState(true);
   const [auth, setAuth] = React.useState(true);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [played, setPlayed] = React.useState(0);
   const [quesId, setQuesId] = React.useState(0);
-  const [isEnded, setIsEnded] = React.useState(false);
   const [openReview, setOpenReview] = React.useState(false);
+  const [isAutoPlay, setIsAutoPlay] = React.useState(false);
   const [isAsk, setIsAsk] = React.useState(false);
   const [IsReply, setIsReply] = React.useState(false);
   const [isReview, setIsReview] = React.useState(true);
+  const [isEnded, setIsEnded] = React.useState(false);
 
   const [valuesAsk, setValuesAsk] = React.useState({
     title: "",
@@ -138,7 +140,6 @@ export default function CourseUserPage() {
       [name]: value,
     }));
   };
-
   const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
@@ -158,14 +159,14 @@ export default function CourseUserPage() {
 
   const handlePreviewVideo = (item: any) => {
     setPreview(item.video);
-    sessionStorage.setItem("video", item.video);
+    setLessonId(item.id);
   };
 
   const handleIdMarkDone = async () => {
     const body: any = {
       courseId: Number(id),
       userId: accInfo.id,
-      lessionId: Number(router?.query?.lesson),
+      lessionId: Number(lessonId),
       completed: true,
     };
     const res = await createLessonOfCourseAPI(body);
@@ -173,7 +174,27 @@ export default function CourseUserPage() {
   };
 
   const handleVideoEnded = () => {
-    setIsEnded(true);
+    const findLess = lessonComplete.some((item) => item.lessionId == lessonId);
+    if (!findLess) {
+      handleIdMarkDone();
+    }
+
+    if (isAutoPlay) {
+      const currentVideo = preview;
+      const currentIndex = course.lessions.findIndex(
+        (item: any) => item.video == currentVideo
+      );
+      const nextVideo = course.lessions.filter(
+        (item: any, i: any) => currentIndex + 1 == i
+      );
+      const lastVideo = course.lessions.length - 1;
+      if (currentIndex == lastVideo) {
+        return;
+      } else {
+        setPreview(nextVideo[0].video);
+        setLessonId(nextVideo[0].id)
+      }
+    }
   };
 
   const handleCreateQuestion = async () => {
@@ -248,26 +269,16 @@ export default function CourseUserPage() {
           setLessonCompleted(lesson.data);
           setQuestions(data.data);
           setCourse(res.data);
+          setPreview(res.data.lessions[0].video);
+          setLessonId(res.data.lessions[0].id);
         }
       } catch (error: any) {
         errorToast(error.response.data.message, 2000);
         router.replace("/");
       }
     })();
-    if (router?.query?.lesson) {
-      setPreview(sessionStorage.getItem("video") || "");
-    } else {
-      setPreview("");
-    }
   }, [router?.query?.id]);
-
-  React.useEffect(() => {
-    setIsEnded(false);
-    if (isEnded) {
-      handleIdMarkDone();
-    }
-  }, [isEnded]);
-
+  
   return (
     <ThemeProvider theme={defaultTheme}>
       <Box sx={{ display: "flex" }}>
@@ -378,12 +389,11 @@ export default function CourseUserPage() {
             {course?.lessions?.map((item: any) => (
               <ListItem
                 sx={{
-                  background: router.query.lesson == item.id ? "#FA8232" : "",
+                  background: preview == item.video ? "#FA8232" : "",
                   cursor: "pointer",
                 }}
                 key={item.id}
                 onClick={() => {
-                  router.push(`/user/course/${id}?lesson=${item.id}`);
                   handlePreviewVideo(item);
                 }}
               >
@@ -439,33 +449,31 @@ export default function CourseUserPage() {
           <Container maxWidth='xl' sx={{ mt: 4 }}>
             <Grid container>
               <Grid item xs={12}>
-                {preview ? (
+                <Box>
+                  {!lessonComplete.some((val) => val.lessionId == lessonId) ? (
+                    <Alert
+                      severity='error'
+                      onClick={() => handleIdMarkDone()}
+                      sx={{
+                        cursor: "pointer",
+                      }}
+                    >
+                      Mark Complete
+                    </Alert>
+                  ) : (
+                    <Alert
+                      sx={{
+                        background: "rgba(41, 235, 128, 0.9)",
+                        mb: 1,
+                        cursor: "pointer",
+                      }}
+                    >
+                      Completed
+                    </Alert>
+                  )}
+
                   <Box>
-                    {lessonComplete.filter(
-                      (val) => val.lessionId == router?.query.lesson
-                    ).length == 0 ? (
-                      <Alert
-                        severity='error'
-                        onClick={() => handleIdMarkDone()}
-                        sx={{
-                          cursor: "pointer",
-                        }}
-                      >
-                        Mark Complete
-                      </Alert>
-                    ) : (
-                      <Alert
-                        sx={{
-                          background: "rgba(41, 235, 128, 0.9)",
-                          mb: 1,
-                          cursor: "pointer",
-                        }}
-                      >
-                        Completed
-                      </Alert>
-                    )}
-                    :
-                    <Box>
+                    <NoSsr>
                       <ReactPlayer
                         url={preview}
                         width={"100%"}
@@ -474,155 +482,145 @@ export default function CourseUserPage() {
                         onProgress={(e) => setPlayed(e.loadedSeconds)}
                         onEnded={handleVideoEnded}
                       />
-                      <Box mt={5}>
-                        <Typography variant='h4'>Q&A</Typography>
-                        <Typography variant='h5' sx={{ mt: 2 }}>
-                          {`All questions in this course (${questions.length})`}
-                        </Typography>
-                        <Box mt={3} mb={3}>
-                          <Button
-                            variant='text'
-                            onClick={() => setIsAsk((prev) => !prev)}
-                          >
-                            Ask a new question
-                          </Button>
-                          {isAsk && (
+                    </NoSsr>
+                    <Box mt={5}>
+                      <FormControlLabel
+                        control={
+                          <Switch
+                            value={isAutoPlay}
+                            onChange={(e) => setIsAutoPlay(e.target.checked)}
+                          />
+                        }
+                        label='AutoPlay'
+                      />
+
+                      <Typography variant='h4'>Q&A</Typography>
+                      <Typography variant='h5' sx={{ mt: 2 }}>
+                        {`All questions in this course (${questions.length})`}
+                      </Typography>
+                      <Box mt={3} mb={3}>
+                        <Button
+                          variant='text'
+                          onClick={() => setIsAsk((prev) => !prev)}
+                        >
+                          Ask a new question
+                        </Button>
+                        {isAsk && (
+                          <Box>
+                            <Typography variant='h6'>Title</Typography>
+                            <TextField
+                              size='small'
+                              sx={{ width: 600 }}
+                              name='title'
+                              value={valuesAsk.title}
+                              onChange={handleChangeValuesAsk}
+                            />
+                            <Typography variant='h6'>Detail</Typography>
+                            <TextField
+                              multiline
+                              maxRows={6}
+                              size='small'
+                              sx={{ width: 600 }}
+                              name='details'
+                              value={valuesAsk.details}
+                              onChange={handleChangeValuesAsk}
+                            />
+                            <Box sx={{ mt: 2 }}>
+                              <Button
+                                size='small'
+                                variant='contained'
+                                sx={{ width: 250 }}
+                                onClick={handleCreateQuestion}
+                              >
+                                Submit
+                              </Button>
+                            </Box>
+                          </Box>
+                        )}
+                      </Box>
+                      {questions.map((item) => (
+                        <Paper sx={{ p: 2, mb: 2 }} key={item.id}>
+                          <Stack flexDirection={"row"} gap={2} mt={3}>
+                            <Avatar
+                              src={item.user.picture || ""}
+                              sx={{ width: 50, height: 50 }}
+                            />
                             <Box>
-                              <Typography variant='h6'>Title</Typography>
-                              <TextField
-                                size='small'
-                                sx={{ width: 600 }}
-                                name='title'
-                                value={valuesAsk.title}
-                                onChange={handleChangeValuesAsk}
-                              />
-                              <Typography variant='h6'>Detail</Typography>
-                              <TextField
-                                multiline
-                                maxRows={6}
-                                size='small'
-                                sx={{ width: 600 }}
-                                name='details'
-                                value={valuesAsk.details}
-                                onChange={handleChangeValuesAsk}
-                              />
-                              <Box sx={{ mt: 2 }}>
-                                <Button
-                                  size='small'
-                                  variant='contained'
-                                  sx={{ width: 250 }}
-                                  onClick={handleCreateQuestion}
+                              <Typography fontWeight={700} variant='h6'>
+                                {item.title}
+                              </Typography>
+                              <Typography>{item.details}</Typography>
+                              <Stack flexDirection={"row"} gap={2}>
+                                <Typography sx={{ color: "purple" }}>
+                                  {item.user.name}
+                                </Typography>
+                                <Typography>
+                                  {dayjs(item.createdAt).fromNow()}
+                                </Typography>
+                              </Stack>
+                              {item.replies.map((reply: any) => (
+                                <Paper
+                                  sx={{
+                                    ml: 2,
+                                    p: 2,
+                                    mb: 2,
+                                    mt: 2,
+                                    background: "rgba(43, 42, 42, 0.117)",
+                                  }}
+                                  key={reply.id}
                                 >
-                                  Submit
+                                  <Box>
+                                    <Stack flexDirection={"row"} gap={2}>
+                                      <Avatar
+                                        src={reply?.user?.picture || ""}
+                                        sx={{ width: 30, height: 30 }}
+                                      />
+                                      <Typography sx={{ color: "purple" }}>
+                                        {reply?.user?.name}
+                                      </Typography>
+                                      <Typography>
+                                        {dayjs(reply.createdAt).fromNow()}
+                                      </Typography>
+                                    </Stack>
+                                    <Typography>{reply.details}</Typography>
+                                  </Box>
+                                </Paper>
+                              ))}
+
+                              <Box sx={{ mt: 2 }}>
+                                <Button onClick={() => handleRowReply(item.id)}>
+                                  Reply
                                 </Button>
+                                {IsReply && item.id == quesId && (
+                                  <Box>
+                                    <TextField
+                                      multiline
+                                      maxRows={6}
+                                      size='small'
+                                      sx={{ width: 600 }}
+                                      value={reply}
+                                      onChange={(e) => setReply(e.target.value)}
+                                    />
+                                    <Box sx={{ mt: 2 }}>
+                                      <Button
+                                        size='small'
+                                        variant='contained'
+                                        sx={{ width: 250 }}
+                                        onClick={() => handleReplyBack(item.id)}
+                                      >
+                                        Submit
+                                      </Button>
+                                    </Box>
+                                  </Box>
+                                )}
                               </Box>
                             </Box>
-                          )}
-                        </Box>
-                        {questions.map((item) => (
-                          <Paper sx={{ p: 2, mb: 2 }} key={item.id}>
-                            <Stack flexDirection={"row"} gap={2} mt={3}>
-                              <Avatar
-                                src={item.user.picture || ""}
-                                sx={{ width: 50, height: 50 }}
-                              />
-                              <Box>
-                                <Typography fontWeight={700} variant='h6'>
-                                  {item.title}
-                                </Typography>
-                                <Typography>{item.details}</Typography>
-                                <Stack flexDirection={"row"} gap={2}>
-                                  <Typography sx={{ color: "purple" }}>
-                                    {item.user.name}
-                                  </Typography>
-                                  <Typography>
-                                    {dayjs(item.createdAt).fromNow()}
-                                  </Typography>
-                                </Stack>
-                                {item.replies.map((reply: any) => (
-                                  <Paper
-                                    sx={{
-                                      ml: 2,
-                                      p: 2,
-                                      mb: 2,
-                                      mt: 2,
-                                      background: "rgba(43, 42, 42, 0.117)",
-                                    }}
-                                    key={reply.id}
-                                  >
-                                    <Box>
-                                      <Stack flexDirection={"row"} gap={2}>
-                                        <Avatar
-                                          src={reply?.user?.picture || ""}
-                                          sx={{ width: 30, height: 30 }}
-                                        />
-                                        <Typography sx={{ color: "purple" }}>
-                                          {reply?.user?.name}
-                                        </Typography>
-                                        <Typography>
-                                          {dayjs(reply.createdAt).fromNow()}
-                                        </Typography>
-                                      </Stack>
-                                      <Typography>{reply.details}</Typography>
-                                    </Box>
-                                  </Paper>
-                                ))}
-
-                                <Box sx={{ mt: 2 }}>
-                                  <Button
-                                    onClick={() => handleRowReply(item.id)}
-                                  >
-                                    Reply
-                                  </Button>
-                                  {IsReply && item.id == quesId && (
-                                    <Box>
-                                      <TextField
-                                        multiline
-                                        maxRows={6}
-                                        size='small'
-                                        sx={{ width: 600 }}
-                                        value={reply}
-                                        onChange={(e) =>
-                                          setReply(e.target.value)
-                                        }
-                                      />
-                                      <Box sx={{ mt: 2 }}>
-                                        <Button
-                                          size='small'
-                                          variant='contained'
-                                          sx={{ width: 250 }}
-                                          onClick={() =>
-                                            handleReplyBack(item.id)
-                                          }
-                                        >
-                                          Submit
-                                        </Button>
-                                      </Box>
-                                    </Box>
-                                  )}
-                                </Box>
-                              </Box>
-                            </Stack>
-                          </Paper>
-                        ))}
-                      </Box>
+                          </Stack>
+                        </Paper>
+                      ))}
                     </Box>
                   </Box>
-                ) : (
-                  <Box>
-                    <Stack
-                      sx={{ height: "70vh" }}
-                      flexDirection={"column"}
-                      alignItems={"center"}
-                      justifyContent={"center"}
-                    >
-                      <PlayCircleIcon sx={{ fontSize: 80, color: "blue" }} />
-                      <Typography variant='h4'>
-                        Click Lesson To Watch
-                      </Typography>
-                    </Stack>
-                  </Box>
-                )}
+                </Box>
               </Grid>
             </Grid>
           </Container>
