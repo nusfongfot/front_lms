@@ -28,7 +28,7 @@ export default function CardCoursesService({
   return (
     <Box>
       <Card
-        sx={{ width: 350, cursor: "pointer" }}
+        sx={{ width: 350, cursor: "pointer", height: 450 }}
         className='card'
         onClick={onClickHeadCard}
       >
@@ -42,7 +42,7 @@ export default function CardCoursesService({
           title='green iguana'
         />
         <CardContent>
-          <Typography gutterBottom variant='h5'>
+          <Typography gutterBottom variant='h5' sx={{ height: "64px" }}>
             {title}
           </Typography>
           <Typography variant='body1' color='text.secondary'>

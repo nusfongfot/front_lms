@@ -127,7 +127,6 @@ export default function CourseUserPage() {
   const [isAsk, setIsAsk] = React.useState(false);
   const [IsReply, setIsReply] = React.useState(false);
   const [isReview, setIsReview] = React.useState(true);
-  const [isEnded, setIsEnded] = React.useState(false);
 
   const [valuesAsk, setValuesAsk] = React.useState({
     title: "",
@@ -479,6 +478,7 @@ export default function CourseUserPage() {
                         width={"100%"}
                         height={"400px"}
                         controls={true}
+                        volume={0.1}
                         onProgress={(e) => setPlayed(e.loadedSeconds)}
                         onEnded={handleVideoEnded}
                       />

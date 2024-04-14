@@ -1,9 +1,5 @@
 import * as React from "react";
-import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import { Box, IconButton, Typography, styled } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
@@ -30,30 +26,34 @@ export default function PreviewDialog({
   lessons,
 }: Props) {
   const [preview, setPreview] = React.useState("");
-  const [isShow, setIsShow] = React.useState(false);
   const [active, setActive] = React.useState(0);
+
   const handleClickPreview = (item: any) => {
     setPreview(item.video);
-    setIsShow(true);
     setActive(item.id);
   };
+
+  React.useMemo(() => {
+    const freePreview = lessons.filter((item: any) => item.free_preview);
+    setPreview(freePreview[0]?.video);
+    setActive(freePreview[0]?.id);
+  }, [open]);
 
   return (
     <React.Fragment>
       <BootstrapDialog
-        aria-labelledby="customized-dialog-title"
+        aria-labelledby='customized-dialog-title'
         open={open}
-        maxWidth="xl"
+        maxWidth='xl'
         sx={{ overflowY: "scroll" }}
       >
-        <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title">
+        <DialogTitle sx={{ m: 0, p: 2 }} id='customized-dialog-title'>
           Free Preview
         </DialogTitle>
         <IconButton
-          aria-label="close"
+          aria-label='close'
           onClick={() => {
             handleClose();
-            setIsShow(false);
           }}
           sx={{
             position: "absolute",
@@ -65,18 +65,14 @@ export default function PreviewDialog({
           <CloseIcon />
         </IconButton>
         <Box sx={{ width: 800, p: 2 }}>
-          {isShow ? (
-            <ReactPlayer
-              url={preview}
-              width={"770px"}
-              height={"300px"}
-              controls={isShow}
-            />
-          ) : (
-            <Typography align="center" variant="h4" height={"300px"}>
-              Choose Video To See
-            </Typography>
-          )}
+          <ReactPlayer
+            url={preview}
+            width={"770px"}
+            height={"300px"}
+            controls={true}
+            volume={0.1}
+          />
+
           {lessons
             .filter((item: any) => item.free_preview)
             .map((item: any) => (
@@ -92,7 +88,7 @@ export default function PreviewDialog({
                   }}
                   onClick={() => handleClickPreview(item)}
                 >
-                  <Typography variant="h5">{item.name}</Typography>
+                  <Typography variant='h5'>{item.name}</Typography>
                 </Box>
               </Box>
             ))}

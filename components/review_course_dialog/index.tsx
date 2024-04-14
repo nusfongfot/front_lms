@@ -3,7 +3,7 @@ import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogTitle from "@mui/material/DialogTitle";
 import { Box, Rating, TextField, Typography, styled } from "@mui/material";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { LoadingButton } from "@mui/lab";
 import { errorToast, successToast } from "@/utils/notification";
 import { createReviewAPI } from "@/api/reviews";
@@ -27,6 +27,7 @@ export default function ReviewCouseUserDiaolog({
   const [starValue, setStarValue] = useState<number>(1);
   const [detail, setDetail] = useState("");
   const [loadingBtn, setLoadingBtn] = useState(false);
+  const [isDisable, setIsDisable] = useState(true);
   const courseId = course?.lessions?.map((item: any) => item.courseId)[0];
 
   const handleClickReview = async () => {
@@ -50,6 +51,14 @@ export default function ReviewCouseUserDiaolog({
       setIsReview(false);
     }
   };
+
+  useMemo(() => {
+    if (!detail) {
+      setIsDisable(true);
+    } else {
+      setIsDisable(false);
+    }
+  }, [detail]);
 
   return (
     <Dialog
@@ -96,6 +105,7 @@ export default function ReviewCouseUserDiaolog({
           variant='contained'
           size='small'
           onClick={handleClickReview}
+          disabled={isDisable}
         >
           Review
         </LoadingButton>
