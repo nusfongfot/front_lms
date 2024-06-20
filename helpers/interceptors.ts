@@ -30,7 +30,7 @@ apiFetch.interceptors.response.use(
     return response;
   },
   (error) => {
-    return errorToast(error.message, 2000);
+    return errorToast(error?.response?.data?.message, 2000);
   }
 );
 export default apiFetch;

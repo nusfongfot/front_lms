@@ -36,7 +36,7 @@ export default function MySignInPage() {
       setCookie("token", res.token);
       router.replace("/");
     } catch (error: any) {
-      errorToast(error.response.data.message, 2000);
+      // console.log('error',error)
     } finally {
       setLoading(false);
     }
